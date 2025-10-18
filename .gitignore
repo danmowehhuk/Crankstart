@@ -1,0 +1,6 @@
+.DS_Store
+*.hex
+*_backup.simu
+build/
+sketch/
+*.sublime-*
