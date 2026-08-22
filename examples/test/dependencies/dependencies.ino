@@ -96,10 +96,10 @@ void testDependencyIsInjected(TestInvocation* t) {
   app.start();
   ProcessorModule* proc =
     static_cast<ProcessorModule*>(app.get(PROCESSOR_MODULE));
-  t->assert(proc != nullptr, F("ProcessorModule should be found"));
-  t->assert(proc->wasInitialized(), F("ProcessorModule should be initialized"));
+  t->verify(proc != nullptr, F("ProcessorModule should be found"));
+  t->verify(proc->wasInitialized(), F("ProcessorModule should be initialized"));
   // counterValue() returns -1 if _counter is nullptr (injection failed)
-  t->assert(proc->counterValue() == 0, F("Counter starts at 0, not -1"));
+  t->verify(proc->counterValue() == 0, F("Counter starts at 0, not -1"));
 }
 
 void testSharedServiceState(TestInvocation* t) {
@@ -113,7 +113,7 @@ void testSharedServiceState(TestInvocation* t) {
   // Verify via CounterModule that the same Counter object was incremented
   CounterModule* counterMod =
     static_cast<CounterModule*>(app.get(COUNTER_MODULE));
-  t->assert(counterMod->get()->value() == 1,
+  t->verify(counterMod->get()->value() == 1,
     F("Counter should be 1 after one loop()"));
 }
 
@@ -127,7 +127,7 @@ void testAddOrderDoesNotMatter(TestInvocation* t) {
   app.start();
   ProcessorModule* proc =
     static_cast<ProcessorModule*>(app.get(PROCESSOR_MODULE));
-  t->assert(proc->counterValue() == 0, F("Should be 0, not -1"));
+  t->verify(proc->counterValue() == 0, F("Should be 0, not -1"));
 }
 
 void setup() {

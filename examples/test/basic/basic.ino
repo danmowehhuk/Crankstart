@@ -59,10 +59,10 @@ void testStartCallsInitialize(TestInvocation* t) {
   t->setName(F("start() calls initialize() and returns true"));
   BasicAppConfig config;
   App app(config);
-  t->assert(app.start(), F("start() should return true"));
-  t->assert(app.didStart(), F("didStart() should be true after start()"));
-  t->assert(gCallCount == 1, F("initialize() should be called once"));
-  t->assert(gCallOrder[0] == 1, F("initialize() should be the first call"));
+  t->verify(app.start(), F("start() should return true"));
+  t->verify(app.didStart(), F("didStart() should be true after start()"));
+  t->verify(gCallCount == 1, F("initialize() should be called once"));
+  t->verify(gCallOrder[0] == 1, F("initialize() should be the first call"));
 }
 
 void testSetupLifecycleOrder(TestInvocation* t) {
@@ -71,10 +71,10 @@ void testSetupLifecycleOrder(TestInvocation* t) {
   App app(config);
   app.start();
   app.setup();
-  t->assert(gCallCount == 4, F("Should have 4 lifecycle calls total"));
-  t->assert(gCallOrder[1] == 2, F("preSetup() should be second"));
-  t->assert(gCallOrder[2] == 3, F("setup() should be third"));
-  t->assert(gCallOrder[3] == 4, F("postSetup() should be fourth"));
+  t->verify(gCallCount == 4, F("Should have 4 lifecycle calls total"));
+  t->verify(gCallOrder[1] == 2, F("preSetup() should be second"));
+  t->verify(gCallOrder[2] == 3, F("setup() should be third"));
+  t->verify(gCallOrder[3] == 4, F("postSetup() should be fourth"));
 }
 
 void testLoopCallsModuleLoop(TestInvocation* t) {
@@ -84,8 +84,8 @@ void testLoopCallsModuleLoop(TestInvocation* t) {
   app.start();
   app.setup();
   app.loop();
-  t->assert(gCallCount == 5, F("Should have 5 lifecycle calls total"));
-  t->assert(gCallOrder[4] == 5, F("loop() should be fifth"));
+  t->verify(gCallCount == 5, F("Should have 5 lifecycle calls total"));
+  t->verify(gCallOrder[4] == 5, F("loop() should be fifth"));
 }
 
 void testShutdownCallsModuleShutdown(TestInvocation* t) {
@@ -95,8 +95,8 @@ void testShutdownCallsModuleShutdown(TestInvocation* t) {
   app.start();
   app.shutdown();
   // After start(): initialize(1). After shutdown(): shutdown(6).
-  t->assert(gCallCount == 2, F("Should have 2 calls: initialize then shutdown"));
-  t->assert(gCallOrder[1] == 6, F("shutdown() should follow initialize()"));
+  t->verify(gCallCount == 2, F("Should have 2 calls: initialize then shutdown"));
+  t->verify(gCallOrder[1] == 6, F("shutdown() should follow initialize()"));
 }
 
 void setup() {

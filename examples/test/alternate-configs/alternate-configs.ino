@@ -151,8 +151,8 @@ void testProdConfigWorks(TestInvocation* t) {
   app.start();
   AppLogicModule* logic =
     static_cast<AppLogicModule*>(app.get(LOGIC_MODULE));
-  t->assert(logic != nullptr, F("AppLogicModule should be found"));
-  t->assert(logic->getLastRead() == 42, F("Should read back 42"));
+  t->verify(logic != nullptr, F("AppLogicModule should be found"));
+  t->verify(logic->getLastRead() == 42, F("Should read back 42"));
 }
 
 void testTestConfigSwapsMock(TestInvocation* t) {
@@ -162,11 +162,11 @@ void testTestConfigSwapsMock(TestInvocation* t) {
   app.start();
   AppLogicModule* logic =
     static_cast<AppLogicModule*>(app.get(LOGIC_MODULE));
-  t->assert(logic != nullptr, F("AppLogicModule should be found"));
+  t->verify(logic != nullptr, F("AppLogicModule should be found"));
   // AppLogicModule behavior is identical regardless of storage implementation
-  t->assert(logic->getLastRead() == 42, F("Should still read back 42"));
+  t->verify(logic->getLastRead() == 42, F("Should still read back 42"));
   // The mock lets us verify the write was called
-  t->assert(config.getMockStorage()->getMock()->writeCalled(),
+  t->verify(config.getMockStorage()->getMock()->writeCalled(),
     F("Mock should have recorded the write call"));
 }
 
