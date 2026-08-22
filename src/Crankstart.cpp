@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "Crankstart.h"
+#include "hal/CrankstartHal.h"
 
 namespace crankstart {
 
@@ -26,10 +27,10 @@ bool AppConfig::noDuplicatesCheck() {
     for (size_t j = i + 1; j < numModules; j++) {
       if (modules[i]->name() == modules[j]->name()) {
 #if (defined(DEBUG))
-        Serial.print(F("FATAL: Multiple modules with name '"));
-        Serial.print(reinterpret_cast<const __FlashStringHelper*>(modules[i]->name()));
-        Serial.println(F("'"));
-        delay(100); // Allow message to print before potentially crashing
+        CrankstartHal::print(F("FATAL: Multiple modules with name '"));
+        CrankstartHal::print(reinterpret_cast<const FlashStr*>(modules[i]->name()));
+        CrankstartHal::println(F("'"));
+        CrankstartHal::delay(100); // Allow message to print before potentially crashing
 #endif
         return false;
       }
@@ -80,8 +81,8 @@ bool AppConfig::sortModulesTopologically() {
       if (result != VISIT_SUCCESS) {
         if (result == VISIT_CIRCULAR_DEPENDENCY) {
 #if (defined(DEBUG))
-          Serial.println(F("FATAL: Circular dependencies detected"));
-          delay(100); // Allow message to print before potentially crashing
+          CrankstartHal::println(F("FATAL: Circular dependencies detected"));
+          CrankstartHal::delay(100); // Allow message to print before potentially crashing
 #endif
         }
         delete[] sorted;
@@ -125,10 +126,10 @@ AppConfig::VisitResult AppConfig::visitModule(size_t index, Module** configModul
       if (dep == nullptr) {
         // Dependency not found
 #if (defined(DEBUG))
-        Serial.print(F("FATAL: Unsatisfied dependency on module with name '"));
-        Serial.print(reinterpret_cast<const __FlashStringHelper*>(*depName));
-        Serial.println(F("'"));
-        delay(100); // Allow message to print before potentially crashing
+        CrankstartHal::print(F("FATAL: Unsatisfied dependency on module with name '"));
+        CrankstartHal::print(reinterpret_cast<const FlashStr*>(*depName));
+        CrankstartHal::println(F("'"));
+        CrankstartHal::delay(100); // Allow message to print before potentially crashing
 #endif
         return VISIT_MISSING_DEPENDENCY;
       }
