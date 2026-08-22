@@ -102,8 +102,8 @@ class TestModuleC : public Module {
     bool postSetupCalled = false;
     bool loopCalled = false;
     bool shutdownCalled = false;
-    void initialize() override { 
-      TestModuleA* testModuleA = app->get(MODULE_A);
+    void initialize() override {
+      TestModuleA* testModuleA = static_cast<TestModuleA*>(app->get(MODULE_A));
       MyService* myService = testModuleA->get();
       anotherService = new AnotherService(myService);
       initialized = true; 
