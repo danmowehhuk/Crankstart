@@ -1,7 +1,11 @@
 #ifndef _crankstart_Crankstart_h
 #define _crankstart_Crankstart_h
 
+#ifndef NO_ARDUINO
 #include <Arduino.h>
+#else
+#include <stddef.h>
+#endif
 #include "CrankstartDeps.h"
 
 namespace crankstart {
