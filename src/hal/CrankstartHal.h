@@ -5,9 +5,8 @@
 // needs for its DEBUG-gated diagnostics, so they can be redirected to
 // BareMetalHAL when building with -DNO_ARDUINO. The Arduino branch below
 // is a pure refactor of what Crankstart.cpp already did inline - no
-// behavior change. The NO_ARDUINO branch is declared only in this Phase
-// 1 pass; definitions are added in Phase 2 once BareMetalHAL provides
-// delay() (see BareMetalHAL PR "Add delay() to Timing HAL category").
+// behavior change. The NO_ARDUINO branch is declared here and defined in
+// CrankstartHal.cpp, delegating to BareMetalHAL.
 
 #include "FlashStr.h"
 
