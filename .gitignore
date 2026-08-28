@@ -4,3 +4,5 @@
 build/
 sketch/
 *.sublime-*
+.claudework/*
+!.claudework/.gitkeep
