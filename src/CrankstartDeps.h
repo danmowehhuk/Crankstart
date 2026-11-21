@@ -9,9 +9,7 @@ namespace crankstart {
   /*
    * Modules can optionally override the deps() method to return a list of
    * module names that the module depends on. This is used to ensure that
-   * modules are initialized in the correct order. Note that deps must 
-   * refer to module names via the Module::name() method, not string literals
-   * or the F() macro.
+   * modules are initialized in the correct order.
    */
  struct DependsOn {
     const char* const* names;  

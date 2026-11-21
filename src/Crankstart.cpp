@@ -4,6 +4,25 @@
 
 namespace crankstart {
 
+namespace {
+
+// Pointer equality first, since it's fast; then the names' text, for a
+// name that's defined in more than one place.
+bool namesMatch(const char* a, const char* b) {
+  return a == b || (a && b && CrankstartHal::flashStrEqual(a, b));
+}
+
+#if (defined(DEBUG))
+void printModuleError(const FlashStr* before, const char* name) {
+  CrankstartHal::print(before);
+  if (name) CrankstartHal::print(reinterpret_cast<const FlashStr*>(name));
+  CrankstartHal::println(F("'"));
+  CrankstartHal::delay(100); // Allow message to print before potentially crashing
+}
+#endif
+
+}
+
 AppConfig::~AppConfig() {
   delete[] modules;
   modules = nullptr;
@@ -25,12 +44,9 @@ bool AppConfig::noDuplicatesCheck() {
   // Check for duplicate module names
   for (size_t i = 0; i < numModules; i++) {
     for (size_t j = i + 1; j < numModules; j++) {
-      if (modules[i]->name() == modules[j]->name()) {
+      if (namesMatch(modules[i]->name(), modules[j]->name())) {
 #if (defined(DEBUG))
-        CrankstartHal::print(F("FATAL: Multiple modules with name '"));
-        CrankstartHal::print(reinterpret_cast<const FlashStr*>(modules[i]->name()));
-        CrankstartHal::println(F("'"));
-        CrankstartHal::delay(100); // Allow message to print before potentially crashing
+        printModuleError(F("FATAL: Multiple modules with name '"), modules[i]->name());
 #endif
         return false;
       }
@@ -126,10 +142,7 @@ AppConfig::VisitResult AppConfig::visitModule(size_t index, Module** configModul
       if (dep == nullptr) {
         // Dependency not found
 #if (defined(DEBUG))
-        CrankstartHal::print(F("FATAL: Unsatisfied dependency on module with name '"));
-        CrankstartHal::print(reinterpret_cast<const FlashStr*>(*depName));
-        CrankstartHal::println(F("'"));
-        CrankstartHal::delay(100); // Allow message to print before potentially crashing
+        printModuleError(F("FATAL: Unsatisfied dependency on module with name '"), *depName);
 #endif
         return VISIT_MISSING_DEPENDENCY;
       }
@@ -157,7 +170,7 @@ AppConfig::VisitResult AppConfig::visitModule(size_t index, Module** configModul
 
 Module* AppConfig::findModule(const char* name, Module** configModules) {
   for (size_t i = 0; i < numModules; i++) {
-    if (configModules[i]->name() == name) {
+    if (namesMatch(configModules[i]->name(), name)) {
       return configModules[i];
     }
   }
@@ -181,13 +194,19 @@ bool App::start() {
 void App::setup() {
   for (size_t i = 0; i < config.numModules; i++) {
     if (!config.modules[i]->preSetup()) {
-      // Handle preSetup failure
+#if (defined(DEBUG))
+      printModuleError(F("ERROR: preSetup() failed for module with name '"),
+                       config.modules[i]->name());
+#endif
       return;
     }
   }
   for (size_t i = 0; i < config.numModules; i++) {
     if (!config.modules[i]->setup()) {
-      // Handle setup failure
+#if (defined(DEBUG))
+      printModuleError(F("ERROR: setup() failed for module with name '"),
+                       config.modules[i]->name());
+#endif
       return;
     }
   }
@@ -210,10 +229,13 @@ void App::shutdown() {
 
 Module* App::get(const char* name) {
   for (size_t i = 0; i < config.numModules; i++) {
-    if (config.modules[i]->name() == name) {
+    if (namesMatch(config.modules[i]->name(), name)) {
       return config.modules[i];
     }
   }
+#if (defined(DEBUG))
+  printModuleError(F("ERROR: get() found no module with name '"), name);
+#endif
   return nullptr;
 }
 

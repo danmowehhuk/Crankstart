@@ -23,7 +23,7 @@ public:
   int  value() const { return _count; }
 };
 
-// Module name constants — PROGMEM, compared by pointer equality.
+// Module name constants, in PROGMEM.
 static const char COUNTER_MODULE[]   PROGMEM = "counter";
 static const char PROCESSOR_MODULE[] PROGMEM = "processor";
 
