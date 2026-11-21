@@ -22,9 +22,8 @@ using namespace crankstart;
 static uint8_t gCallOrder[6];
 static uint8_t gCallCount = 0;
 
-// Module names must be static const char[] in PROGMEM.
-// Crankstart compares names by POINTER EQUALITY, not string value —
-// always refer to the name via the same constant, never a string literal.
+// Module names are PROGMEM strings. Crankstart is more efficient when it can
+// use pointer equality for module names.
 static const char LOGGER_MODULE[] PROGMEM = "logger";
 
 // A minimal module that records each lifecycle call into gCallOrder.

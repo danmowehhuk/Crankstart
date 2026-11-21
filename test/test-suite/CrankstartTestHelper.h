@@ -11,6 +11,14 @@ static const char MODULE_B[] PROGMEM = "b";
 static const char MODULE_C[] PROGMEM = "c";
 static const char MODULE_D[] PROGMEM = "d";
 
+// A separate copy of module A's name: each array is its own object, so its
+// address differs from MODULE_A's.
+static const char MODULE_A_COPY[] PROGMEM = "a";
+static const char MODULE_E[] PROGMEM = "e";
+
+// Starts like module A's name, but isn't it.
+static const char MODULE_A_LONGER[] PROGMEM = "ab";
+
 
 // Create a couple of service classes for dependency injection testing.
 // The AnotherService class depends on the MyService class, and each
@@ -143,6 +151,35 @@ class AlternateModuleA : public Module {
     void shutdown() override { shutdownCalled = true; }
 };
 
+// TestModuleD depends on TestModuleA through a separate copy of its name.
+class TestModuleD : public Module {
+  public:
+    const char* name() const override { return MODULE_D; }
+    DependsOn deps() const override {
+      static const char* deps[] = { MODULE_A_COPY, nullptr };
+      return { deps };
+    };
+
+    MyService* myService = nullptr;
+    void initialize() override {
+      TestModuleA* testModuleA = static_cast<TestModuleA*>(app->get(MODULE_A_COPY));
+      if (testModuleA) myService = testModuleA->get();
+    }
+};
+
+// CopyNamedModuleA has module A's name, from a separate copy.
+class CopyNamedModuleA : public Module {
+  public:
+    const char* name() const override { return MODULE_A_COPY; }
+};
+
+// FailingSetupModule's setup() fails.
+class FailingSetupModule : public Module {
+  public:
+    const char* name() const override { return MODULE_E; }
+    bool setup() override { return false; }
+};
+
 
 // A basic working configuration using modules A, B, and C.
 class SimpleTestConfig : public AppConfig {
@@ -191,6 +228,40 @@ class UnsatisfiedDependencyTestConfig : public AppConfig {
     void configure() override {
       addModule(&moduleB);
       addModule(&moduleC);
+    }
+};
+
+// Module D finds module A through a separate copy of A's name.
+class CopiedNameTestConfig : public AppConfig {
+  public:
+    TestModuleD moduleD;
+    TestModuleA moduleA;
+    void configure() override {
+      addModule(&moduleD);
+      addModule(&moduleA);
+    }
+};
+
+// Two modules whose names have the same text, in separate copies, which
+// should cause a fatal error during startup.
+class CopiedDuplicateTestConfig : public AppConfig {
+  public:
+    TestModuleA moduleA;
+    CopyNamedModuleA moduleA2;
+    void configure() override {
+      addModule(&moduleA);
+      addModule(&moduleA2);
+    }
+};
+
+// A module whose setup() fails, added before module B.
+class FailingSetupTestConfig : public AppConfig {
+  public:
+    FailingSetupModule failing;
+    TestModuleB moduleB;
+    void configure() override {
+      addModule(&failing);
+      addModule(&moduleB);
     }
 };
 

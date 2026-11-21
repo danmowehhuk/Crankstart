@@ -1,12 +1,10 @@
 #ifndef _crankstart_hal_CrankstartHal_h
 #define _crankstart_hal_CrankstartHal_h
 
-// Consolidates the Serial and Timing calls Crankstart's core (src/)
-// needs for its DEBUG-gated diagnostics, so they can be redirected to
-// BareMetalHAL when building with -DNO_ARDUINO. The Arduino branch below
-// is a pure refactor of what Crankstart.cpp already did inline - no
-// behavior change. The NO_ARDUINO branch is declared here and defined in
-// CrankstartHal.cpp, delegating to BareMetalHAL.
+// The platform calls Crankstart's core (src/) makes: reading flash strings
+// to match module names, and Serial and timing for its DEBUG-gated
+// diagnostics. With -DNO_ARDUINO they go to BareMetalHAL instead of the
+// Arduino core; that branch is defined in CrankstartHal.cpp.
 
 #include "FlashStr.h"
 
@@ -20,17 +18,22 @@ namespace CrankstartHal {
 
 #ifndef NO_ARDUINO
 
+inline char readByte(const char* flashPtr) { return (char)pgm_read_byte(flashPtr); }
 inline void print(const FlashStr* s) { Serial.print(s); }
 inline void println(const FlashStr* s) { Serial.println(s); }
 inline void delay(uint32_t ms) { ::delay(ms); }
 
 #else
 
+char readByte(const char* flashPtr);
 void print(const FlashStr* s);
 void println(const FlashStr* s);
 void delay(uint32_t ms);
 
 #endif
+
+// Returns true if the two flash strings have the same text.
+bool flashStrEqual(const char* a, const char* b);
 
 }  // namespace CrankstartHal
 

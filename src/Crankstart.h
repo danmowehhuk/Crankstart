@@ -12,16 +12,13 @@ namespace crankstart {
 
   /*
    * All modules to be used in an AppConfig must inherit from this class and
-   * override the name() method to return a static const PROGMEM string.
-   * Module names are compared only by pointer equality, so do not use 
-   * string literals or the F() macro for names. Instead, always create a static
-   * const char[] (ideally PROGMEM) variable to hold the name.
+   * override the name() method to return the module's name, a PROGMEM string.
+   * Crankstart is more efficient when it can use pointer equality for module
+   * names.
    *
    * Modules can optionally override the deps() method to return a list of
    * module names that the module depends on. This is used to ensure that
-   * modules are initialized in the correct order. Note that deps must 
-   * refer to module names via the Module::name() method, not string literals
-   * or the F() macro.
+   * modules are initialized in the correct order.
    *
    * Modules can optionally override the initialize(), preSetup(), setup(),
    * postSetup(), loop(), and shutdown() methods to customize the module's
@@ -117,6 +114,7 @@ namespace crankstart {
    * The get(<name>) method is intended to be used in the initialize() method of
    * modules to access other modules. Crankstart guarantees that any declared
    * dependencies will be available at the time the module is initialized.
+   * get(<name>) returns nullptr if no module has that name.
    *
    * NOTE: C++ will implicitly cast the Module* returned by get(<name>) to
    * whatever variable type the user assigns it to. If the user assigns it to

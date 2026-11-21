@@ -58,11 +58,15 @@ when `app.setup()` and `app.loop()` are called:
 | Hook | Triggered by | Typical use |
 |---|---|---|
 | `initialize()` | `app.start()` | Allocate services, retrieve dependencies via `app->get()` |
-| `preSetup()` | `app.setup()` | Pin modes, clocks, static validation — return `false` to abort |
-| `setup()` | `app.setup()` | `begin()`, handshakes, timeouts — return `false` to abort |
+| `preSetup()` | `app.setup()` | Pin modes, clocks, static validation — return `false` to stop setup |
+| `setup()` | `app.setup()` | `begin()`, handshakes, timeouts — return `false` to stop setup |
 | `postSetup()` | `app.setup()` | Logging, cache warming, post-setup actions |
 | `loop()` | `app.loop()` | Polling, periodic work |
 | `shutdown()` | `app.shutdown()` | Cleanup (optional) |
+
+If a module's `preSetup()` or `setup()` returns `false`, `app.setup()` stops there: no
+later `preSetup()`, `setup()` or `postSetup()` runs. `app.loop()` still calls every
+module's `loop()`, so a module whose setup can fail should check for that in its `loop()`.
 
 ## Defining a Module
 
@@ -70,9 +74,8 @@ Module instances are held as **member variables of the AppConfig subclass**, not
 on the heap. `configure()` registers them with `addModule()`:
 
 ```cpp
-// Module names must be static const char[] in PROGMEM.
-// Crankstart compares names by POINTER EQUALITY, not string value.
-// Always use the same constant — never use string literals or F() for names.
+// Module names are PROGMEM strings. Crankstart is more efficient when it can
+// use pointer equality for module names.
 static const char MY_MODULE[] PROGMEM = "my-module";
 
 class MyModule : public crankstart::Module {
@@ -84,7 +87,7 @@ public:
   }
 
   bool setup() override {
-    return _service->begin();  // return false to abort startup
+    return _service->begin();  // return false to stop setup
   }
 
   void loop() override {
@@ -123,7 +126,8 @@ DependsOn deps() const override {
 ## Accessing Dependencies
 
 In `initialize()`, use `app->get(<name>)` to retrieve a module by name. The return type
-is `Module*`; cast to the concrete type with `static_cast`:
+is `Module*`, or `nullptr` if no module has that name; cast to the concrete type with
+`static_cast`:
 
 ```cpp
 void initialize() override {
@@ -234,6 +238,9 @@ Crankstart prints the cause to Serial:
 - **Duplicate module names** — two modules registered with the same name
 - **Circular dependencies** — module A depends on B which depends on A
 - **Missing dependencies** — a declared dependency has no matching module
+
+With `DEBUG` defined, Crankstart also prints an error when `app->get()` finds no module
+with the name it's given, and when a module's `preSetup()` or `setup()` returns `false`.
 
 ## Examples
 
